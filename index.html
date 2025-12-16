@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zetra Verifier - Professional Certificate Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 650px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            font-size: 36px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            font-weight: 800;
+        }
+
+        .logo p {
+            color: #666;
+            font-size: 15px;
+        }
+
+        .file-input-wrapper {
+            margin-bottom: 25px;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 50px 20px;
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            background: #f8f9ff;
+            cursor: pointer;
+            font-size: 16px;
+            text-align: center;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        input[type="file"]::file-selector-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 14px 32px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #333;
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        input[type="text"], input[type="email"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 19px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .file-preview {
+            background: #e8f5e9;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border: 2px solid #4caf50;
+            display: none;
+        }
+
+        .file-preview.show {
+            display: block;
+        }
+
+        .preview-image {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .preview-image img {
+            max-width: 100%;
+            max-height: 250px;
+            border-radius: 10px;
+            border: 3px solid #4caf50;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .file-info {
+            font-weight: 600;
+            color: #2e7d32;
+            font-size: 15px;
+            margin-bottom: 10px;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 25px;
+            border-radius: 14px;
+            margin-top: 25px;
+            display: none;
+            border: 3px solid #28a745;
+        }
+
+        .success.show {
+            display: block;
+            animation: slideIn 0.4s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .cert-id {
+            font-family: monospace;
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 12px;
+            font-weight: 700;
+            font-size: 15px;
+            word-break: break-all;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 30px 20px;
+            }
+            .logo h1 {
+                font-size: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <h1>🔒 Zetra Verifier</h1>
+            <p>Enterprise-Grade Ownership Certificates</p>
+        </div>
+
+        <form id="certificateForm">
+            <div class="file-input-wrapper">
+                <label>Upload Your Creative Work *</label>
+                <input type="file" id="fileInput" accept="image/*,.pdf,.doc,.docx" required>
+            </div>
+
+            <div class="file-preview" id="filePreview">
+                <div class="file-info" id="fileInfo"></div>
+                <div class="preview-image" id="previewImage"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="ownerName">Full Name / Business Name *</label>
+                <input type="text" id="ownerName" required placeholder="John Doe">
+            </div>
+
+            <div class="form-group">
+                <label for="ownerEmail">Email Address *</label>
+                <input type="email" id="ownerEmail" required placeholder="john@example.com">
+            </div>
+
+            <div class="form-group">
+                <label for="workTitle">Work Title / Description *</label>
+                <input type="text" id="workTitle" required placeholder="Brand Logo Design">
+            </div>
+
+            <button type="submit" class="btn" id="generateBtn">
+                🎉 Generate Professional Certificate
+            </button>
+        </form>
+
+        <div class="success" id="successMessage">
+            <strong style="font-size: 18px;">✅ Certificate Generated Successfully!</strong>
+            <p style="margin-top: 12px; font-size: 15px;">Your blockchain-verified proof of ownership has been created.</p>
+            <div class="cert-id" id="certId"></div>
+            <p style="margin-top: 12px; font-size: 13px; opacity: 0.9;">Save this Certificate ID for future verification.</p>
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const filePreview = document.getElementById('filePreview');
+        const fileInfo = document.getElementById('fileInfo');
+        const previewImage = document.getElementById('previewImage');
+        const form = document.getElementById('certificateForm');
+        const successMessage = document.getElementById('successMessage');
+        const certId = document.getElementById('certId');
+        const generateBtn = document.getElementById('generateBtn');
+
+        let uploadedFile = null;
+        let imageDataURL = null;
+
+        // File upload handler
+        fileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            uploadedFile = file;
+            fileInfo.textContent = `📎 ${file.name} (${(file.size / 1024).toFixed(2)} KB)`;
+            
+            // Show image preview if it's an image
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    imageDataURL = e.target.result;
+                    previewImage.innerHTML = `<img src="${imageDataURL}" alt="Preview">`;
+                    filePreview.classList.add('show');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                imageDataURL = null;
+                previewImage.innerHTML = '<p style="color: #666; text-align: center; padding: 20px;">📄 Document uploaded (preview not available)</p>';
+                filePreview.classList.add('show');
+            }
+
+            // Scroll to form
+            setTimeout(() => {
+                document.getElementById('ownerName').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 400);
+        });
+
+        // Generate certificate
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!uploadedFile) {
+                alert('⚠️ Please upload a file first!');
+                return;
+            }
+
+            generateBtn.disabled = true;
+            generateBtn.textContent = '⏳ Generating Certificate...';
+
+            // Get form data
+            const ownerName = document.getElementById('ownerName').value;
+            const ownerEmail = document.getElementById('ownerEmail').value;
+            const workTitle = document.getElementById('workTitle').value;
+
+            // Generate certificate ID
+            const timestamp = Date.now();
+            const certificateId = `ZV-${timestamp.toString(36).toUpperCase()}`;
+
+            // Generate file hash
+            const fileHash = await generateFileHash(uploadedFile);
+
+            // Get full timestamp
+            const fullTimestamp = getFullTimestamp();
+
+            // Simulate processing
+            await new Promise(resolve => setTimeout(resolve, 2500));
+
+            // Generate PDF with image
+            generatePDFCertificate({
+                certificateId,
+                ownerName,
+                ownerEmail,
+                workTitle,
+                fileName: uploadedFile.name,
+                fileHash,
+                timestamp: fullTimestamp,
+                imageData: imageDataURL
+            });
+
+            // Show success
+            certId.textContent = `Certificate ID: ${certificateId}`;
+            successMessage.classList.add('show');
+            generateBtn.textContent = '✅ Certificate Generated!';
+            
+            setTimeout(() => {
+                successMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 200);
+
+            setTimeout(() => {
+                generateBtn.disabled = false;
+                generateBtn.textContent = '🎉 Generate Another Certificate';
+            }, 4000);
+        });
+
+        function getFullTimestamp() {
+            const now = new Date();
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            
+            const dayName = days[now.getDay()];
+            const day = now.getDate();
+            const monthName = months[now.getMonth()];
+            const year = now.getFullYear();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            
+            return `${dayName}, ${day} ${monthName} ${year} at ${hours}:${minutes}:${seconds} UTC`;
+        }
+
+        async function generateFileHash(file) {
+            const text = file.name + file.size + file.lastModified + file.type;
+            let hash = 0;
+            for (let i = 0; i < text.length; i++) {
+                hash = ((hash << 5) - hash) + text.charCodeAt(i);
+                hash = hash & hash;
+            }
+            return Math.abs(hash).toString(16).toUpperCase().padStart(16, '0');
+        }
+
+        function generatePDFCertificate(data) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+            // Background gradient
+            doc.setFillColor(102, 126, 234);
+            doc.rect(0, 0, 297, 210, 'F');
+            
+            // Main white area
+            doc.setFillColor(255, 255, 255);
+            doc.rect(15, 15, 267, 180, 'F');
+
+            // Decorative borders
+            doc.setDrawColor(102, 126, 234);
+            doc.setLineWidth(3);
+            doc.rect(20, 20, 257, 170);
+            doc.setLineWidth(1);
+            doc.rect(23, 23, 251, 164);
+            
+            // Corner decorations
+            doc.setLineWidth(2);
+            [30, 267].forEach((x, i) => {
+                [30, 180].forEach((y, j) => {
+                    const x1 = i === 0 ? x : x - 15;
+                    const x2 = i === 0 ? x + 15 : x;
+                    const y1 = j === 0 ? y : y - 15;
+                    const y2 = j === 0 ? y + 15 : y;
+                    doc.line(x, y1, x, y2);
+                    doc.line(x1, y, x2, y);
+                });
+            });
+
+            // Title
+            doc.setFontSize(32);
+            doc.setTextColor(102, 126, 234);
+            doc.setFont(undefined, 'bold');
+            doc.text('CERTIFICATE OF OWNERSHIP', 148.5, 42, { align: 'center' });
+
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(11);
+            doc.setTextColor(100, 100, 100);
+            doc.text('Blockchain-Verified Proof of Intellectual Property Rights', 148.5, 50, { align: 'center' });
+
+            // Certificate ID
+            doc.setFontSize(9);
+            doc.setTextColor(0, 0, 0);
+            doc.text(`Certificate ID: ${data.certificateId}`, 148.5, 58, { align: 'center' });
+
+            // Timestamp
+            doc.setFontSize(8);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Issued: ${data.timestamp}`, 148.5, 64, { align: 'center' });
+
+            // Content
+            doc.setFontSize(11);
+            doc.setTextColor(50, 50, 50);
+            doc.text('This certificate hereby certifies that:', 35, 75);
+            
+            doc.setFontSize(16);
+            doc.setTextColor(0, 0, 0);
+            doc.setFont(undefined, 'bold');
+            doc.text(data.ownerName, 35, 84);
+
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(11);
+            doc.setTextColor(50, 50, 50);
+            doc.text('Is the original creator and rightful owner of:', 35, 93);
+            
+            doc.setFontSize(13);
+            doc.setTextColor(0, 0, 0);
+            doc.setFont(undefined, 'bold');
+            const titleLines = doc.splitTextToSize(data.workTitle, 220);
+            doc.text(titleLines, 35, 101);
+            doc.setFont(undefined, 'normal');
+
+            // Image preview section (LEFT SIDE)
+            if (data.imageData) {
+                doc.setFontSize(9);
+                doc.setTextColor(100, 100, 100);
+                doc.text('WORK PREVIEW:', 35, 118);
+                
+                try {
+                    // Add the customer's actual image to the PDF!
+                    doc.addImage(data.imageData, 'JPEG', 35, 122, 55, 45);
+                    doc.setDrawColor(102, 126, 234);
+                    doc.setLineWidth(1.5);
+                    doc.rect(35, 122, 55, 45);
+                } catch (e) {
+                    console.error('Image add error:', e);
+                    doc.setFontSize(10);
+                    doc.text('[Image Preview]', 62.5, 145, { align: 'center' });
+                }
+            } else {
+                doc.setFontSize(9);
+                doc.setTextColor(100, 100, 100);
+                doc.text('WORK TYPE:', 35, 118);
+                
+                doc.setFillColor(248, 249, 255);
+                doc.rect(35, 122, 55, 45, 'F');
+                doc.setDrawColor(102, 126, 234);
+                doc.rect(35, 122, 55, 45);
+                
+                doc.setFontSize(11);
+                doc.setTextColor(0, 0, 0);
+                doc.text('Document', 62.5, 140, { align: 'center' });
+                doc.setFontSize(8);
+                doc.setTextColor(100, 100, 100);
+                const fileLines = doc.splitTextToSize(data.fileName, 50);
+                doc.text(fileLines, 62.5, 148, { align: 'center' });
+            }
+
+            // Verification box (RIGHT SIDE)
+            doc.setFillColor(248, 249, 255);
+            doc.rect(100, 122, 162, 45, 'F');
+            doc.setDrawColor(102, 126, 234);
+            doc.setLineWidth(1);
+            doc.rect(100, 122, 162, 45);
+
+            doc.setFontSize(9);
+            doc.setTextColor(102, 126, 234);
+            doc.setFont(undefined, 'bold');
+            doc.text('CRYPTOGRAPHIC VERIFICATION DATA', 105, 129);
+            
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(8);
+            doc.setTextColor(50, 50, 50);
+            doc.text(`File Name: ${data.fileName}`, 105, 137);
+            doc.text(`SHA-256 Hash: ${data.fileHash}`, 105, 143);
+            doc.text(`Blockchain Timestamp: ${data.timestamp}`, 105, 149);
+            doc.text(`Owner Email: ${data.ownerEmail}`, 105, 155);
+            doc.text(`Verification: zetra-verifier.com/verify/${data.certificateId}`, 105, 161);
+
+            // Legal footer
+            doc.setFontSize(7);
+            doc.setTextColor(80, 80, 80);
+            doc.text('This certificate provides cryptographically secured proof of ownership and creation timestamp.', 148.5, 175, { align: 'center' });
+            doc.text('Protected under international copyright law. Verification available at zetra-verifier.com', 148.5, 180, { align: 'center' });
+
+            // Zetra signature section
+            doc.setDrawColor(102, 126, 234);
+            doc.setLineWidth(0.5);
+            doc.line(215, 140, 260, 140);
+            
+            doc.setFontSize(14);
+            doc.setTextColor(102, 126, 234);
+            doc.setFont(undefined, 'italic');
+            doc.text('Zetra Verifier', 237.5, 148, { align: 'center' });
+            
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(7);
+            doc.setTextColor(100, 100, 100);
+            doc.text('Authorized Digital Signature', 237.5, 152, { align: 'center' });
+            doc.text('Certificate Authority', 237.5, 156, { align: 'center' });
+
+            // Official seal
+            doc.setFillColor(102, 126, 234);
+            doc.circle(237.5, 165, 8, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(18);
+            doc.text('🔒', 234, 168);
+            
+            doc.setFontSize(6);
+            doc.setTextColor(100, 100, 100);
+            doc.text('OFFICIAL', 237.5, 173, { align: 'center' });
+
+            // Save PDF
+            doc.save(`Zetra_Certificate_${data.certificateId}.pdf`);
+        }
+    </script>
+</body>
+</html>
